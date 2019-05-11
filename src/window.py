@@ -27,6 +27,7 @@ class OrbitWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'OrbitWindow'
 
     canvas = Gtk.Template.Child()
+    pause_btn = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,13 +39,14 @@ class OrbitWindow(Gtk.ApplicationWindow):
                                Gdk.EventMask.KEY_PRESS_MASK |
                                Gdk.EventMask.KEY_RELEASE_MASK)
         self.game = Game(FPS_TH)
-        GObject.timeout_add(1000//FPS_TH, self.main)
+        self.paused = True
+        self.toggle_pause()
 
     def main(self):
 
-        proceed = self.game.tick()
+        self.game.tick()
         self.canvas.queue_draw()
-        return proceed
+        return not self.paused
 
     @Gtk.Template.Callback()
     def on_draw(self, win, cr):
@@ -62,6 +64,8 @@ class OrbitWindow(Gtk.ApplicationWindow):
     def on_keypress(self, widget, event):
 
         keyname = Gdk.keyval_name(event.keyval)
+        if keyname == "Escape":
+            self.pause_btn.set_active(not self.paused)
         self.game.on_keypress(keyname)
 
     @Gtk.Template.Callback()
@@ -69,6 +73,17 @@ class OrbitWindow(Gtk.ApplicationWindow):
 
         keyname = Gdk.keyval_name(event.keyval)
         self.game.on_keyrelease(keyname)
+
+    @Gtk.Template.Callback()
+    def on_pause(self, button):
+
+        self.toggle_pause()
+
+    def toggle_pause(self):
+
+        self.paused = not self.paused
+        if not self.paused:
+            GObject.timeout_add(1000//FPS_TH, self.main)
 
     def canvas_size(self):
 

@@ -2,6 +2,11 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-media-pause</property>
+  </object>
   <template class="OrbitWindow" parent="GtkApplicationWindow">
     <property name="can_focus">True</property>
     <property name="default_width">500</property>
@@ -15,13 +20,39 @@
       </object>
     </child>
     <child>
-      <object class="GtkDrawingArea" id="canvas">
+      <object class="GtkOverlay">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <signal name="configure-event" handler="on_configure" swapped="no"/>
-        <signal name="draw" handler="on_draw" swapped="no"/>
-        <signal name="key-press-event" handler="on_keypress" swapped="no"/>
-        <signal name="key-release-event" handler="on_keyrelease" swapped="no"/>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkDrawingArea" id="canvas">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <signal name="configure-event" handler="on_configure" swapped="no"/>
+            <signal name="draw" handler="on_draw" swapped="no"/>
+            <signal name="key-press-event" handler="on_keypress" swapped="no"/>
+            <signal name="key-release-event" handler="on_keyrelease" swapped="no"/>
+          </object>
+          <packing>
+            <property name="index">-1</property>
+          </packing>
+        </child>
+        <child type="overlay">
+          <object class="GtkToggleButton" id="pause_btn">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="halign">end</property>
+            <property name="valign">end</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">10</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">10</property>
+            <property name="image">image1</property>
+            <property name="image_position">top</property>
+            <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_pause" swapped="no"/>
+          </object>
+        </child>
       </object>
     </child>
   </template>
