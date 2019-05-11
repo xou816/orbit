@@ -20,6 +20,7 @@ class ContextScaler:
         self.cairo_ctx.save()
         for f in self.context_func:
             f(self.cairo_ctx)
+        return self.cairo_ctx
 
     def __exit__(self, *args):
 
@@ -34,21 +35,17 @@ class Scene:
 
         self.cairo_ctx = cairo_ctx
         self.context_func = context_func
-        self.scaler = ContextScaler(cairo_ctx, *context_func)
+        self.scale = ContextScaler(cairo_ctx, *context_func)
 
     def compose(self, *context_func):
 
         funcs = self.context_func + context_func
         return Scene(self.cairo_ctx, *funcs)
 
-    def scale(self):
-
-        return self.scaler
-
     def dist(self, dx, dy):
 
         """Convert game distances dx, dy to actual screen distances (pixels)"""
 
-        with self.scaler:
+        with self.scale:
             w, h = self.cairo_ctx.user_to_device_distance(dx, dy)
         return w, h

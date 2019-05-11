@@ -12,8 +12,8 @@ class Player:
 
         """Create a new player"""
 
-        self.x = x
-        self.y = y
+        self._old_pos = (x, y)
+        self._pos = (x, y)
         self._angle = angle
         self.size = size
         self.range = range
@@ -34,8 +34,19 @@ class Player:
         self._angle = angle
 
     @property
+    def x(self): return self._pos[0]
+
+    @property
+    def y(self): return self._pos[1]
+
+    @property
     def position(self):
-        return self.x, self.y
+        return self._pos
+
+    @position.setter
+    def position(self, new_pos):
+        self._old_pos = self._pos
+        self._pos = new_pos
 
     @property
     def screen(self):
@@ -57,7 +68,7 @@ class Player:
 
     def scene(self, cr):
 
-        return Scene(cr, self.apply_scene_context)
+        return Scene(cr, self._apply_scene_context)
 
     def rotate(self, angle):
 
@@ -76,11 +87,12 @@ class Player:
             circle, rotation = self.hook_data
             dist = self.dist_circle(circle)
             self.rotate(rotation*self.speed/dist)
-            self.x = circle.x - rotation*dist*math.cos(self.angle)
-            self.y = circle.y + rotation*dist*math.sin(self.angle)
+            self.position = (circle.x - rotation*dist*math.cos(self.angle),
+                             circle.y + rotation*dist*math.sin(self.angle))
         else:
-            self.x += self.speed*math.sin(self.angle)
-            self.y += self.speed*math.cos(self.angle)
+            x, y = self.position
+            self.position = (x + self.speed*math.sin(self.angle),
+                             y + self.speed*math.cos(self.angle))
 
     def dist_circle(self, circle):
 
@@ -134,7 +146,7 @@ class Player:
 
         return min(circles, key=self.dist_circle)
 
-    def apply_scene_context(self, cr):
+    def _apply_scene_context(self, cr):
 
         cr.translate(0.5 - self.x, 0.5 - self.y)
 
@@ -192,14 +204,15 @@ class Player:
             cr.set_source_rgba(0.8, 0.8, 0.8, 1)
             cr.fill()
 
-    def draw_trail(self, cr, x, y, draw_offset=0):
+    def draw_trail(self, cr):
 
         """Draw player trail from x, y to player position"""
 
         with tmp_context(cr):
 
             # Everything is drawn at (0,0) and must be translated and rotated
-            cr.translate(x, y + draw_offset)
+            x, y = self._old_pos
+            cr.translate(x, y)
             cr.rotate(-self.angle)
 
             colors = [

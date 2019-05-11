@@ -1,7 +1,29 @@
 import math
+import random
+import itertools
 
 
 class Circle:
+
+    def generator(circles_per_screen, margin):
+
+        # Maximal and minimal radis
+        max_r = 1/(10*circles_per_screen)
+        min_r = 0.05
+
+        for generated in itertools.count():
+
+            screen_circles = []
+
+            for i in range(circles_per_screen):
+                r = random.uniform(min_r, max_r)
+                # Random x position, but ensuring we do not overflow
+                x = random.uniform(r, 1 - r)
+                # offset + nth screen portion + some margin between circles
+                y = generated + i*1/circles_per_screen + margin
+                screen_circles.append(Circle(x, y, r))
+
+            yield screen_circles
 
     """Drawn circle"""
 
