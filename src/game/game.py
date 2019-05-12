@@ -1,5 +1,6 @@
 import math
 import cairo
+import contextlib
 from .scene import Scene
 from .player import Player
 from .circle import Circle
@@ -86,8 +87,8 @@ class Game:
 
     def get_buffer(self, screen):
 
-        while len(self.buffers) < screen + 1:
-            self.new_buffer()
+        for index in range(len(self.buffers), screen + 2):
+            self.buffers.append((index, self.new_buffer()))
         return self.buffers[screen]
 
     def buffer_context(self, buffer):
@@ -107,12 +108,16 @@ class Game:
                 cr.scale(1, -1)
                 cr.set_font_size(0.1)
                 cr.show_text(str(len(self.buffers)))
-        self.buffers.append(buffer)
+        return buffer
 
     def get_buffers(self):
 
         screen = self.player.screen
-        return (self.get_buffer(screen), self.get_buffer(screen + 1))
+        return [self.get_buffer(screen), self.get_buffer(screen + 1)]
+
+    def invalidate_buffers(self):
+
+        self.buffers = [(screen, None) for screen, _ in self.buffers]
 
 
 class GameScene:
@@ -124,11 +129,12 @@ class GameScene:
 
         self.cr = cr
         self.scene = scene
-        self.player_scene = self.player.scene(cr)
 
+    @contextlib.contextmanager
     def player_scene(self):
-
-        return self.player.scene(self.cr)
+        with self.scene.scale as cr1:
+            with self.player.scene(cr1).scale as cr2:
+                yield cr2
 
     def draw(self):
 
@@ -136,25 +142,31 @@ class GameScene:
         self.cr.paint()
 
         with self.scene.scale:
-
             self.draw_safe_area()
+
+        self.draw_buffers()
+
+        with self.player_scene():
+            self.draw_circles()
+            self.draw_target()
             self.draw_player()
 
-            with self.player_scene.scale:
+    def draw_buffers(self):
 
-                self.draw_circles()
-                self.draw_target()
+        for screen, buffer in self.game.get_buffers():
 
-        for i, buffer in enumerate(self.game.get_buffers()):
+            if buffer is not None:
 
-            with self.game.buffer_context(buffer) as buf:
-                buf.translate(0, -self.player.screen + 0.5 - i)
-                self.player.draw_trail(buf)
+                with self.game.buffer_context(buffer) as cr:
+                    dy = screen - 0.5
+                    if 1 > self.player.y - dy > 0:
+                        cr.translate(0, -dy)
+                        self.player.draw_trail(cr)
 
-            px, py = self.player.position
-            dx, dy = self.scene.dist(px - 0.5, py%1 - i)
-            self.cr.set_source_surface(buffer, -dx, -dy)
-            self.cr.paint()
+                px, py = self.player.position
+                dx, dy = self.scene.dist(px - 0.5, py - screen)
+                self.cr.set_source_surface(buffer, -dx, -dy)
+                self.cr.paint()
 
     def draw_safe_area(self):
 

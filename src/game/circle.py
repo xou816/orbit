@@ -11,7 +11,7 @@ class Circle:
         max_r = 1/(10*circles_per_screen)
         min_r = 0.05
 
-        for generated in itertools.count():
+        for screen in itertools.count():
 
             screen_circles = []
 
@@ -20,7 +20,7 @@ class Circle:
                 # Random x position, but ensuring we do not overflow
                 x = random.uniform(r, 1 - r)
                 # offset + nth screen portion + some margin between circles
-                y = generated + i*1/circles_per_screen + margin
+                y = screen + i*1/circles_per_screen + margin
                 screen_circles.append(Circle(x, y, r))
 
             yield screen_circles

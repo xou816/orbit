@@ -193,7 +193,7 @@ class Player:
 
         size = self.size
         with tmp_context(cr):
-            cr.translate(0.5, 0.5)  # Center player
+            cr.translate(self.x, self.y)  # Center player
             cr.rotate(-self.angle)
             cr.move_to(size, -3/2*size)
             cr.line_to(size, 0)

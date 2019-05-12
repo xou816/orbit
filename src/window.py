@@ -26,6 +26,7 @@ FPS_TH = 60
 class OrbitWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'OrbitWindow'
 
+    header_bar = Gtk.Template.Child()
     canvas = Gtk.Template.Child()
     pause_btn = Gtk.Template.Child()
 
@@ -41,6 +42,7 @@ class OrbitWindow(Gtk.ApplicationWindow):
         self.game = Game(FPS_TH)
         self.paused = True
         self.toggle_pause()
+        self.header_bar.set_subtitle("(score here)")
 
     def main(self):
 
@@ -58,6 +60,7 @@ class OrbitWindow(Gtk.ApplicationWindow):
 
         self.game.size = self.canvas_size()
         self.game.scene_params = self.scene_params()
+        self.game.invalidate_buffers()
         return False
 
     @Gtk.Template.Callback()
