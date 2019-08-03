@@ -34,6 +34,7 @@ orbit_sources = [
   'game/game.py',
   'game/player.py',
   'game/__init__.py',
+  'resources/playerShip1_blue.png'
 ]
 
 install_data(orbit_sources, install_dir: moduledir)

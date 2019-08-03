@@ -15,6 +15,7 @@ class Game:
         self._circle_generator = Circle.generator(2, 0.2)
         self.circles = [next(self._circle_generator)]
         self.buffers = []
+        self.player_tex = None
         self.pressed_keys = []
         self.player = Player(0.5, 0, 0,
                              size=0.02,
@@ -32,7 +33,9 @@ class Game:
 
     def get_scene(self, cr):
 
-        return GameScene(self, cr, Scene(cr, self._apply_scene_context))
+        scene = Scene(cr, self._apply_scene_context)
+        self.load_textures(scene)
+        return GameScene(self, cr, scene)
 
     def on_keypress(self, keyname):
 
@@ -62,7 +65,7 @@ class Game:
             self.player.reset_hook()
 
         self.player.move()
-        return True
+        return self.player.screen
 
     def get_circles_in_screen(self, screen):
 
@@ -117,7 +120,22 @@ class Game:
 
     def invalidate_buffers(self):
 
+        self.player_tex = None
         self.buffers = [(screen, None) for screen, _ in self.buffers]
+
+    def load_textures(self, scene):
+
+        """
+        TODO: load using GResources
+        """
+
+        if self.player_tex is None:
+            s, _ = scene.dist(self.player.size, 0)
+            s = int(s)
+            self.player_tex = cairo.ImageSurface(cairo.FORMAT_ARGB32,
+                                                 s, s)
+            self.player_tex = self.player_tex.create_from_png(
+                "/app/share/orbit/orbit/playerShip1_blue.png")
 
 
 class GameScene:
@@ -150,6 +168,11 @@ class GameScene:
             self.draw_circles()
             self.draw_target()
             self.draw_player()
+
+        self.cr.rotate(self.player.angle)
+        dx, dy = self.scene.dist(0.5, 0.5)
+        self.cr.set_source_surface(self.game.player_tex, dx - 50, -dy)
+        self.cr.paint()
 
     def draw_buffers(self):
 

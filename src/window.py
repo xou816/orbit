@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GObject, Gio
 from .game import Game
 
 
@@ -31,6 +31,7 @@ class OrbitWindow(Gtk.ApplicationWindow):
     pause_btn = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
+
         super().__init__(**kwargs)
         self.canvas.add_events(Gdk.EventMask.SCROLL_MASK |
                                Gdk.EventMask.BUTTON_PRESS_MASK |
@@ -42,11 +43,16 @@ class OrbitWindow(Gtk.ApplicationWindow):
         self.game = Game(FPS_TH)
         self.paused = True
         self.toggle_pause()
-        self.header_bar.set_subtitle("(score here)")
+
+    def load_resources(self):
+
+        resource_path = "/app/share/orbit/orbit.gresource"
+        return Gio.Resource.load(resource_path)
 
     def main(self):
 
-        self.game.tick()
+        score = self.game.tick()
+        self.header_bar.set_subtitle("Score: {}".format(score))
         self.canvas.queue_draw()
         return not self.paused
 

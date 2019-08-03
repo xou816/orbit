@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/dev/alextren/Orbit">
     <file>window.ui</file>
+    <file>resources/playerShip1_blue.png</file>
   </gresource>
 </gresources>
